@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择支付方式</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: normal;
+            flex: 1;
+            text-align: center;
+            margin-right: 33px;
+        }
+        
+        .container {
+            background: white;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+        
+        .order-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e53e3e;
+        }
+        
+        .order-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .order-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .payment-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .payment-option.selected {
+            border-color: #07c160;
+            background-color: #f0f9ff;
+        }
+        
+        .payment-option.selected.alipay {
+            border-color: #1890ff;
+        }
+        
+        .selected-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 20px;
+            height: 20px;
+            background-color: #07c160;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .payment-option.selected .selected-indicator {
+            display: flex;
+        }
+        
+        .payment-option.selected.alipay .selected-indicator {
+            background-color: #1890ff;
+        }
+        
+        .payment-header {
+            display: flex;
+            align-items: center;
+        }
+        
+        .payment-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .payment-icon.wechat {
+            background-image: url('微信支付_爱给网_aigei_com.png');
+        }
+        
+        .payment-icon.alipay {
+            background-image: url('支付宝_爱给网_aigei_com.png');
+        }
+        
+        .payment-name {
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .payment-name.wechat {
+            color: #07c160;
+        }
+        
+        .payment-name.alipay {
+            color: #1890ff;
+        }
+        
+        .payment-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e53e3e;
+        }
+        
+        .payment-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .pay-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .pay-btn.wechat {
+            background-color: #07c160;
+            color: white;
+        }
+        
+        .pay-btn.alipay {
+            background-color: #1890ff;
+            color: white;
+        }
+        
+        .pay-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .qr-code {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .qr-code.show {
+            display: block;
+        }
+        
+        .qr-placeholder {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px 20px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .qr-instruction {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .platform-footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="header-title">选择支付方式</div>
+    </div>
+    
+    <div class="container">
+        <!-- 订单信息显示区域 -->
+        <div id="orderInfo" class="order-info">
+            <h3>订单信息</h3>
+            <p><strong>订单号:</strong> 加载中...</p>
+            <p><strong>企业名称:</strong> 加载中...</p>
+            <p><strong>服务类型:</strong> 加载中...</p>
+            <p><strong>服务金额:</strong> <span id="serviceAmount">加载中...</span></p>
+        </div>
+        
+        
+        <!-- 支付宝支付选项 -->
+        <div class="payment-option selected" id="alipayOption" onclick="selectPayment('alipay')">
+            <div class="selected-indicator">✓</div>
+            <div class="payment-header">
+                <div class="payment-info">
+                    <div class="payment-icon alipay"></div>
+                    <div class="payment-name alipay">支付宝支付</div>
+                </div>
+                <div class="payment-price" id="alipayPrice">加载中...</div>
+            </div>
+            <div class="payment-description">点击按钮查看支付宝收款二维码</div>
+            <button class="pay-btn alipay" onclick="createAlipayOrder()">
+                确认付款 ✓
+            </button>
+            <div class="qr-code" id="alipayQR">
+                <div class="qr-placeholder">
+                    [支付宝支付二维码]<br>
+                    请使用支付宝扫码支付
+                </div>
+                <div class="qr-instruction">请使用支付宝扫描上方二维码完成支付</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="platform-footer">
+        企业年报服务平台
+    </div>
+    
+    <script>
+        let selectedPayment = 'alipay';
+        let currentOrderId = null;
+        // 从localStorage获取用户选择的价格，如果没有则默认为营业执照注销的199元
+        let currentAmount = parseInt(localStorage.getItem('selectedPrice')) || 199;
+        
+        // 选择支付方式
+        function selectPayment(type) {
+            // 只支持支付宝
+            document.getElementById('alipayOption').classList.add('selected');
+            selectedPayment = 'alipay';
+        }
+        
+        // 创建支付宝订单
+        async function createAlipayOrder() {
+            try {
+                const payBtn = document.querySelector('.pay-btn.alipay');
+                payBtn.textContent = '处理中...';
+                payBtn.disabled = true;
+                
+                const serviceType = localStorage.getItem('selectedService') === '年报申报' ? 'annualReport' : 'licenseCancel';
+                
+                const response = await fetch('/api/payment/alipay/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        serviceType: serviceType,
+                        amount: currentAmount,
+                        orderId: currentOrderId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.payment_url) {
+                    // 跳转到真实支付页面
+                    window.location.href = result.payment_url;
+                } else {
+                    alert('支付创建失败: ' + (result.error || '未知错误'));
+                    payBtn.textContent = '确认付款 ✓';
+                    payBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('支付请求失败:', error);
+                alert('支付请求失败，请重试');
+                const payBtn = document.querySelector('.pay-btn.alipay');
+                payBtn.textContent = '确认付款 ✓';
+                payBtn.disabled = false;
+            }
+        }
+        
+        // 处理支付
+        function processPayment(orderId, paymentMethod) {
+            console.log(`处理支付: 订单ID=${orderId}, 支付方式=${paymentMethod}`);
+            
+            // 显示处理中状态
+            const payBtn = document.querySelector(`.pay-btn.${paymentMethod}`);
+            const originalText = payBtn.textContent;
+            payBtn.textContent = '处理中...';
+            payBtn.disabled = true;
+            
+            // 模拟支付处理时间
+            setTimeout(() => {
+                // 更新订单数据
+                if (orderId) {
+                    const orderData = JSON.parse(localStorage.getItem(`order_${orderId}`) || '{}');
+                    if (orderData.orderId) {
+                        orderData.paymentStatus = 'paid';
+                        orderData.paymentMethod = paymentMethod;
+                        orderData.paymentTime = new Date().toISOString();
+                        
+                        // 确保订单数据中包含正确的金额和服务信息
+                        if (!orderData.selectedPrice && currentAmount) {
+                            orderData.selectedPrice = currentAmount;
+                        }
+                        if (!orderData.selectedService) {
+                            const selectedService = localStorage.getItem('selectedService') || '年报申报';
+                            orderData.selectedService = selectedService;
+                        }
+                        
+                        localStorage.setItem(`order_${orderId}`, JSON.stringify(orderData));
+                        console.log('订单数据已更新:', orderData);
+                    }
+                }
+                
+                // 保存支付信息（兼容性）
+                const paymentInfo = {
+                    orderId: orderId,
+                    paymentMethod: paymentMethod,
+                    paymentTime: new Date().toISOString(),
+                    status: 'completed'
+                };
+                localStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+                
+                // 支付成功提示
+                alert('支付成功！');
+                
+                // 跳转到成功页面
+                window.location.href = `success.html?orderId=${orderId}&paymentMethod=${paymentMethod}`;
+            }, 1500);
+        }
+        
+        // 返回上一页
+        function goBack() {
+            window.location.href = 'form.html';
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            const formData = localStorage.getItem('formData');
+            const orderId = localStorage.getItem('currentOrderId');
+            
+            // 如果没有订单信息，创建演示数据
+            if (!formData || !orderId) {
+                console.log('没有找到订单信息，创建演示数据');
+                
+                // 获取用户选择的服务信息，确保使用用户实际选择的金额
+                const selectedService = localStorage.getItem('selectedService') || '年报申报';
+                const selectedPrice = parseInt(localStorage.getItem('selectedPrice')) || 130;
+                currentAmount = selectedPrice; // 确保金额与用户选择一致
+                
+                // 创建演示订单
+                const demoOrderId = 'DEMO' + Date.now();
+                const demoFormData = {
+                    companyName: '演示企业有限公司',
+                    creditCode: '91110000000000001X',
+                    contactPerson: '张先生',
+                    contactPhone: '138****8888',
+                    selectedService: selectedService,
+                    selectedPrice: selectedPrice
+                };
+                
+                // 保存演示数据
+                localStorage.setItem('formData', JSON.stringify(demoFormData));
+                localStorage.setItem('currentOrderId', demoOrderId);
+                
+                // 创建演示订单数据
+                const demoOrderData = {
+                    orderId: demoOrderId,
+                    ...demoFormData,
+                    selectedPrice: selectedPrice,  // 确保金额正确保存
+                    selectedService: selectedService,  // 确保服务类型正确保存
+                    paymentStatus: 'pending',
+                    paymentMethod: null,
+                    createTime: new Date().toISOString(),
+                    paymentTime: null
+                };
+                localStorage.setItem(`order_${demoOrderId}`, JSON.stringify(demoOrderData));
+                
+                currentOrderId = demoOrderId;
+                
+                // 显示演示订单信息
+                document.getElementById('orderInfo').innerHTML = `
+                    <h3>订单信息</h3>
+                    <p><strong>订单号:</strong> ${demoOrderId}</p>
+                    <p><strong>企业名称:</strong> ${demoFormData.companyName}</p>
+                    <p><strong>联系人:</strong> ${demoFormData.contactPerson}</p>
+                    <p><strong>服务类型:</strong> ${selectedService}</p>
+                    <p><strong>服务金额:</strong> <span id="serviceAmount">¥${selectedPrice}</span></p>
+                `;
+            } else {
+                try {
+                    const data = JSON.parse(formData);
+                    currentOrderId = orderId;
+                    
+                    // 获取服务信息 - 优先使用用户选择的金额
+                    const selectedService = data.selectedService || localStorage.getItem('selectedService') || '年报申报';
+                    const userSelectedPrice = parseInt(localStorage.getItem('selectedPrice'));
+                    const selectedPrice = userSelectedPrice || data.selectedPrice || 130;
+                    currentAmount = selectedPrice;
+                    
+                    // 显示订单信息
+                    document.getElementById('orderInfo').innerHTML = `
+                        <h3>订单信息</h3>
+                        <p><strong>订单号:</strong> ${orderId}</p>
+                        <p><strong>企业名称:</strong> ${data.companyName || '未填写'}</p>
+                        <p><strong>联系人:</strong> ${data.contactPerson || data.legalPerson || '未填写'}</p>
+                        <p><strong>服务类型:</strong> ${selectedService}</p>
+                        <p><strong>服务金额:</strong> <span id="serviceAmount">¥${selectedPrice}</span></p>
+                    `;
+                } catch (error) {
+                    console.error('解析订单数据失败:', error);
+                    alert('订单数据格式错误，将使用演示数据');
+                    // 回退到演示数据逻辑
+                    window.location.reload();
+                }
+            }
+            
+            // 更新支付选项的价格显示 - 确保与用户选择金额一致
+            const userSelectedPrice = parseInt(localStorage.getItem('selectedPrice')) || currentAmount;
+            document.getElementById('alipayPrice').textContent = `¥${userSelectedPrice}`;
+            currentAmount = userSelectedPrice; // 确保currentAmount与用户选择一致
+            
+            // 默认选中支付宝
+            selectPayment('alipay');
+        });
+    </script>
+</body>
+</html>

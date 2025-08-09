@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业年报申报</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .header::before {
+            content: '';
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .sidebar-menu {
+            background-color: rgba(0,0,0,0.1);
+            color: white;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+        
+        .sidebar-menu::before {
+            content: '📁';
+            margin-right: 8px;
+        }
+        
+        .container {
+            background: white;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .service-section {
+            margin-bottom: 20px;
+        }
+        
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        
+        .service-radio {
+            display: flex;
+            align-items: center;
+        }
+        
+        .service-radio input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .service-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .service-label.selected {
+            color: #e53e3e;
+        }
+        
+        .service-price {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e53e3e;
+        }
+        
+        .original-price {
+            font-size: 12px;
+            color: #999;
+            text-decoration: line-through;
+            font-weight: normal;
+        }
+        
+        .agreement-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .agreement-checkbox {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .agreement-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+            margin-top: 2px;
+            transform: scale(1.1);
+        }
+        
+        .agreement-checkbox label {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #666;
+        }
+        
+        .agreement-link {
+            color: #e53e3e;
+            text-decoration: none;
+        }
+        
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #9ca3af;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+        }
+        
+        .process-btn.active {
+            background-color: #dc2626;
+            cursor: pointer;
+        }
+        
+        .consequences-section {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .consequences-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .consequences-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .consequence-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .consequence-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .modern-warning {
+            width: 24px;
+            height: 20px;
+            background-color: white;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .modern-warning::after {
+            content: '!';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c20000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .modern-money {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .modern-money::before {
+            content: '¥';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c20000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .modern-person {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: white;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .modern-person::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 8px;
+            border-radius: 8px 8px 0 0;
+            background-color: white;
+        }
+        
+        .modern-hammer {
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            position: relative;
+            margin: 0 auto;
+            transform: rotate(45deg);
+        }
+        
+        .modern-hammer::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 2px;
+            width: 12px;
+            height: 6px;
+            background-color: white;
+            border-radius: 2px;
+        }
+        
+        .modern-briefcase {
+            width: 18px;
+            height: 14px;
+            border-radius: 2px;
+            position: relative;
+            margin: 0 auto;
+            background: white;
+        }
+        
+        .modern-briefcase::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 5px;
+            width: 8px;
+            height: 5px;
+            border-radius: 2px 2px 0 0;
+            background: white;
+        }
+        
+        .modern-certificate {
+            width: 16px;
+            height: 20px;
+            border-radius: 2px;
+            position: relative;
+            margin: 0 auto;
+            background: white;
+        }
+        
+        .modern-certificate::after {
+            content: '×';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c20000;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .consequence-text {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .special-notice-container {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            margin: 15px;
+            border-radius: 25px;
+            padding: 25px;
+        }
+        
+        .special-notice-title {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .special-notice {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #60a5fa;
+        }
+        
+        .final-process-btn {
+            margin: 15px;
+            padding: 15px;
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            width: calc(100% - 30px);
+            cursor: pointer;
+        }
+        
+        .platform-footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>企业年报申报</h1>
+    </div>
+    
+    <div class="sidebar-menu">
+        服务产品
+    </div>
+    
+    <div class="container">
+        <div class="service-section">
+            <div class="service-item">
+                <div class="service-radio">
+                    <input type="radio" name="service" id="annual-report">
+                    <label class="service-label" for="annual-report">年报申报</label>
+                </div>
+                <div class="service-price">
+                    ¥130
+                    <span class="original-price">¥298</span>
+                </div>
+            </div>
+            
+            <div class="service-item">
+                <div class="service-radio">
+                    <input type="radio" name="service" id="license-cancel" checked>
+                    <label class="service-label selected" for="license-cancel">营业执照注销</label>
+                </div>
+                <div class="service-price">
+                    ¥199
+                    <span class="original-price">¥299</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="agreement-section">
+            <div class="agreement-checkbox">
+                <input type="checkbox" id="agreement">
+                <label for="agreement">
+                    同读并同意 <a href="#" class="agreement-link">《服务协议》</a> 及 <a href="#" class="agreement-link">《隐私政策》</a>
+                </label>
+            </div>
+        </div>
+        
+        <button class="process-btn" id="processBtn" onclick="goToForm()">立即办理</button>
+    </div>
+    
+    <div class="consequences-section">
+        <div class="consequences-title">企业长期未提交年报的后果</div>
+        <div class="consequences-grid">
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-warning"></div>
+                </div>
+                <div class="consequence-text">列入经营异常状态</div>
+            </div>
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-money"></div>
+                </div>
+                <div class="consequence-text">贷款受到限制</div>
+            </div>
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-person"></div>
+                </div>
+                <div class="consequence-text">个人信息受损</div>
+            </div>
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-hammer"></div>
+                </div>
+                <div class="consequence-text">产生工商处罚</div>
+            </div>
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-briefcase"></div>
+                </div>
+                <div class="consequence-text">任职资格受限</div>
+            </div>
+            <div class="consequence-item">
+                <div class="consequence-icon">
+                    <div class="modern-certificate"></div>
+                </div>
+                <div class="consequence-text">无法新办执照</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="special-notice-container">
+        <div class="special-notice-title">特别提醒</div>
+        <div class="special-notice">
+            我司为经营主体提供代办服务，收取服务代办费用，如果代办不成功，我们予以全额退款。我们非国家工商行政管理部门，仅为提高经营主体办理效率，经营主体也可通过线下所属市监局或线上国家企业信息公示系统免费办理，请知悉！
+        </div>
+    </div>
+    
+    <button class="final-process-btn" onclick="goToForm()">立即办理</button>
+    
+    <div class="platform-footer">
+        企业年报服务平台
+    </div>
+    
+    <script>
+        const checkbox = document.getElementById('agreement');
+        const processBtn = document.getElementById('processBtn');
+        
+        checkbox.addEventListener('change', function() {
+            if (checkbox.checked) {
+                processBtn.classList.add('active');
+                processBtn.style.cursor = 'pointer';
+                processBtn.style.backgroundColor = '#dc2626';
+            } else {
+                processBtn.classList.remove('active');
+                processBtn.style.cursor = 'not-allowed';
+                processBtn.style.backgroundColor = '#9ca3af';
+            }
+        });
+        
+        function goToForm() {
+            if (checkbox.checked) {
+                // 获取选中的服务
+                const annualReport = document.getElementById('annual-report');
+                const licenseCancel = document.getElementById('license-cancel');
+                
+                let selectedService = '营业执照注销';
+                let selectedPrice = 199;
+                
+                // 检查哪个服务被选中
+                if (annualReport.checked) {
+                    selectedService = '年报申报';
+                    selectedPrice = 130;
+                } else if (licenseCancel.checked) {
+                    selectedService = '营业执照注销';
+                    selectedPrice = 199;
+                }
+                
+                // 保存选中的服务信息到localStorage
+                localStorage.setItem('selectedService', selectedService);
+                localStorage.setItem('selectedPrice', selectedPrice.toString());
+                
+                console.log('选择的服务:', selectedService, '价格:', selectedPrice);
+                
+                window.location.href = 'form.html';
+            } else {
+                alert('请先同意服务协议和隐私政策');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>填写企业信息</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: normal;
+            flex: 1;
+            text-align: center;
+            margin-right: 33px;
+        }
+        
+        .container {
+            background: white;
+            min-height: calc(100vh - 70px);
+        }
+        
+        .form-section {
+            padding: 30px 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .required {
+            color: #e53e3e;
+            margin-left: 5px;
+        }
+        
+
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #fafafa;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: white;
+        }
+        
+        .form-input::placeholder {
+            color: #999;
+        }
+        
+        .code-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .warning-section {
+            background-color: #fffbeb;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 30px 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .warning-icon {
+            color: #f59e0b;
+            margin-right: 8px;
+            font-size: 16px;
+            margin-top: 2px;
+        }
+        
+        .warning-text {
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .submit-btn {
+            margin: 30px 20px 20px;
+            padding: 15px;
+            background-color: #9ca3af;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            width: calc(100% - 40px);
+            cursor: not-allowed;
+        }
+        
+        .submit-btn.active {
+            background-color: #3b82f6;
+            cursor: pointer;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <div class="header-title">填写企业信息</div>
+    </div>
+    
+    <div class="container">
+        <div class="form-section">
+            <div class="form-group">
+                <label class="form-label company-label">
+                    企业名称<span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="companyName" placeholder="请输入企业全称" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label code-label">
+                    统一社会信用代码<span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="creditCode" placeholder="请输入18位统一社会信用代码" maxlength="18" required>
+                <div class="code-description">请输入18位数字和字母组合的统一社会信用代码</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label person-label">
+                    法人姓名<span class="required">*</span>
+                </label>
+                <input type="text" class="form-input" id="legalPerson" placeholder="请输入法人姓名" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label phone-label">
+                    联系电话<span class="required">*</span>
+                </label>
+                <input type="tel" class="form-input" id="phoneNumber" placeholder="请输入手机号" maxlength="11" required>
+            </div>
+        </div>
+        
+        <div class="warning-section">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">请确保信息准确，提交后将立即开始处理</div>
+        </div>
+        
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">确认信息并支付</button>
+    </div>
+    
+    <script>
+        const inputs = document.querySelectorAll('.form-input');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        function checkFormValidity() {
+            let allFilled = true;
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allFilled = false;
+                }
+            });
+            
+            // 验证信用代码长度
+            const creditCode = document.getElementById('creditCode').value;
+            if (creditCode.length !== 18) {
+                allFilled = false;
+            }
+            
+            // 验证手机号长度
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            if (phoneNumber.length !== 11) {
+                allFilled = false;
+            }
+            
+            if (allFilled) {
+                submitBtn.classList.add('active');
+                submitBtn.style.backgroundColor = '#3b82f6';
+                submitBtn.style.cursor = 'pointer';
+            } else {
+                submitBtn.classList.remove('active');
+                submitBtn.style.backgroundColor = '#9ca3af';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+        }
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', checkFormValidity);
+        });
+        
+        // 限制信用代码只能输入数字和字母
+        document.getElementById('creditCode').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            checkFormValidity();
+        });
+        
+        // 限制手机号只能输入数字
+        document.getElementById('phoneNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkFormValidity();
+        });
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        async function submitForm() {
+            if (!submitBtn.classList.contains('active')) {
+                return;
+            }
+            
+            // 显示提交状态
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+            submitBtn.style.background = '#ccc';
+            
+            // 获取选择的服务信息
+            const selectedService = localStorage.getItem('selectedService') || '年报申报';
+            const selectedPrice = parseInt(localStorage.getItem('selectedPrice')) || 130;
+            
+            // 收集表单数据
+            const formData = {
+                companyName: document.getElementById('companyName').value,
+                creditCode: document.getElementById('creditCode').value,
+                legalPerson: document.getElementById('legalPerson').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                selectedService: selectedService,
+                selectedPrice: selectedPrice
+            };
+            
+            // 生成订单号
+            const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
+            
+            // 创建订单数据
+            const orderData = {
+                orderId: orderId,
+                ...formData,
+                paymentStatus: 'pending',
+                paymentMethod: null,
+                createTime: new Date().toISOString(),
+                paymentTime: null
+            };
+            
+            // 保存表单数据和订单数据
+            localStorage.setItem('formData', JSON.stringify(formData));
+            localStorage.setItem('currentOrderId', orderId);
+            localStorage.setItem(`order_${orderId}`, JSON.stringify(orderData));
+            
+            // 模拟提交延迟
+            setTimeout(() => {
+                // 跳转到支付页面
+                window.location.href = 'payment.html';
+            }, 1500);
+        }
+        
+        function resetSubmitButton() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '确认信息并支付';
+            checkFormValidity();
+        }
+        
+        // 页面加载时检查是否有保存的数据
+        window.onload = function() {
+            // 如果没有选择服务，默认设置为年报申报
+            if (!localStorage.getItem('selectedService')) {
+                localStorage.setItem('selectedService', '年报申报');
+                localStorage.setItem('selectedPrice', '130');
+            }
+            
+            const savedData = localStorage.getItem('formData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('companyName').value = data.companyName || '';
+                document.getElementById('creditCode').value = data.creditCode || '';
+                document.getElementById('legalPerson').value = data.legalPerson || '';
+                document.getElementById('phoneNumber').value = data.phoneNumber || '';
+                checkFormValidity();
+            }
+        };
+    </script>
+</body>
+</html>

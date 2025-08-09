@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付成功 - 企业年报服务平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .success-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            position: relative;
+            animation: successPulse 2s ease-in-out infinite;
+        }
+        
+        .success-icon::before {
+            content: '✓';
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
+        
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .success-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+        
+        .success-message {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .order-info {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .order-info-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .amount-value {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .process-status {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .status-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8fafc;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .contact-info {
+            background: #fffbeb;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .contact-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+        
+        .contact-text {
+            font-size: 12px;
+            color: #92400e;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 30px 25px;
+                margin: 10px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon"></div>
+        
+        <h1 class="success-title">支付成功！</h1>
+        <p class="success-message">
+            恭喜您，订单支付已完成！我们将尽快开始为您处理年报申报服务。
+        </p>
+        
+        <div class="order-info">
+            <div class="order-info-title">订单信息</div>
+            <div class="info-row">
+                <span class="info-label">订单号</span>
+                <span class="info-value" id="orderId">加载中...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">企业名称</span>
+                <span class="info-value" id="companyName">加载中...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">服务类型</span>
+                <span class="info-value" id="serviceType">年报申报</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">支付金额</span>
+                <span class="info-value amount-value" id="amount">加载中...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">支付时间</span>
+                <span class="info-value" id="paymentTime">刚刚</span>
+            </div>
+        </div>
+        
+        <div class="process-status">
+            <div class="status-title">📋 接下来的流程</div>
+            <div class="status-message">
+                我们已收到您的订单和支付信息，专业团队将在1个工作日内开始处理您的年报申报。处理完成后，我们会通过您提供的联系方式通知您。
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn btn-primary">返回首页</a>
+            <button class="btn btn-secondary" onclick="window.print()">打印订单</button>
+        </div>
+        
+        <div class="contact-info">
+            <div class="contact-title">⚠️ 重要提醒</div>
+            <div class="contact-text">
+                请保存好您的订单号以便查询。如有疑问，请联系客服。我们承诺：如代办不成功，将全额退款。
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 从 URL 参数或本地存储获取订单信息
+        function loadOrderInfo() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            
+            // 从本地存储获取表单数据
+            const formData = localStorage.getItem('formData');
+            
+            if (orderId) {
+                document.getElementById('orderId').textContent = orderId.substring(0, 12) + '...';
+                
+                // 尝试从订单数据中获取详细信息
+                const orderData = localStorage.getItem(`order_${orderId}`);
+                if (orderData) {
+                    try {
+                        const order = JSON.parse(orderData);
+                        // 显示订单中保存的金额和服务类型 - 优先使用用户选择的金额
+                        const userSelectedPrice = parseInt(localStorage.getItem('selectedPrice'));
+                        const displayPrice = userSelectedPrice || order.selectedPrice || 130;
+                        document.getElementById('amount').textContent = `¥${displayPrice}`;
+                        if (order.selectedService) {
+                            document.getElementById('serviceType').textContent = order.selectedService;
+                        }
+                        if (order.companyName) {
+                            document.getElementById('companyName').textContent = order.companyName;
+                        }
+                        if (order.paymentTime) {
+                            const paymentTime = new Date(order.paymentTime);
+                            document.getElementById('paymentTime').textContent = paymentTime.toLocaleString('zh-CN');
+                        }
+                    } catch (e) {
+                        console.error('解析订单数据失败:', e);
+                    }
+                }
+            }
+            
+            if (formData) {
+                try {
+                    const data = JSON.parse(formData);
+                    // 如果订单数据中没有企业名称，使用表单数据
+                    if (document.getElementById('companyName').textContent === '加载中...') {
+                        document.getElementById('companyName').textContent = data.companyName || '未知企业';
+                    }
+                    
+                    // 如果订单数据中没有金额信息，使用用户选择的金额
+                    const userSelectedPrice = parseInt(localStorage.getItem('selectedPrice'));
+                    const displayPrice = userSelectedPrice || data.selectedPrice || 130;
+                    if (document.getElementById('amount').textContent === '加载中...') {
+                        document.getElementById('amount').textContent = `¥${displayPrice}`;
+                    }
+                    
+                    // 如果订单数据中没有服务类型，使用表单数据
+                    if (data.selectedService) {
+                        document.getElementById('serviceType').textContent = data.selectedService;
+                    }
+                    
+                    // 清除本地存储的表单数据（已完成支付）
+                    localStorage.removeItem('formData');
+                } catch (e) {
+                    console.error('解析表单数据失败:', e);
+                }
+            }
+            
+            // 如果支付时间还没有设置，设置为当前时间
+            if (document.getElementById('paymentTime').textContent === '刚刚') {
+                const now = new Date();
+                document.getElementById('paymentTime').textContent = now.toLocaleString('zh-CN');
+            }
+        }
+        
+        // 页面加载时执行
+        window.onload = function() {
+            loadOrderInfo();
+            
+            // 如果没有订单信息，3秒后自动跳转到首页
+            setTimeout(() => {
+                const orderId = document.getElementById('orderId').textContent;
+                if (orderId === '加载中...') {
+                    window.location.href = '/';
+                }
+            }, 3000);
+        };
+        
+        // 防止用户直接访问成功页面
+        if (!window.location.search && !localStorage.getItem('formData')) {
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
