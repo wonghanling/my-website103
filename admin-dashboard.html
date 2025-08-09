@@ -155,9 +155,40 @@
             transition: all 0.3s ease;
         }
         
-        .refresh-btn:hover {
+        .export-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .export-btn, .clear-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .export-btn:hover, .clear-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .clear-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .data-count {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
         }
         
         .orders-table {
@@ -362,25 +393,35 @@
                 <div class="stat-number" id="pendingOrders">0</div>
                 <div class="stat-label">待处理订单</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon orders">💾</div>
+                <div class="stat-number" id="dataCount">0/1000</div>
+                <div class="stat-label">数据存储</div>
+            </div>
         </div>
         
         <!-- 订单列表 -->
         <div class="orders-section">
             <div class="section-header">
-                <h2 class="section-title">订单管理</h2>
-                <button class="refresh-btn" onclick="loadOrders()">刷新数据</button>
+                <h2 class="section-title">企业信息管理</h2>
+                <div class="export-actions">
+                    <button class="export-btn" onclick="exportData()">导出数据</button>
+                    <button class="clear-btn" onclick="clearData()">清空数据</button>
+                    <button class="refresh-btn" onclick="loadOrders()">刷新数据</button>
+                </div>
             </div>
             
             <div id="ordersTableContainer">
                 <table class="orders-table" id="ordersTable">
                     <thead>
                         <tr>
-                            <th>订单号</th>
                             <th>企业名称</th>
-                            <th>联系人</th>
+                            <th>统一社会信用代码</th>
+                            <th>法人姓名</th>
                             <th>联系电话</th>
+                            <th>服务类型</th>
                             <th>支付状态</th>
-                            <th>创建时间</th>
+                            <th>提交时间</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -480,11 +521,24 @@
             const totalOrders = orders.length;
             const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
             const pendingOrders = orders.filter(order => order.paymentStatus === 'pending');
-            const totalRevenue = paidOrders.length * 299; // 每单299元
+            
+            // 计算总收入（根据实际价格）
+            const totalRevenue = paidOrders.reduce((sum, order) => {
+                return sum + (order.selectedPrice || 130);
+            }, 0);
             
             document.getElementById('totalOrders').textContent = totalOrders;
             document.getElementById('totalRevenue').textContent = `¥${totalRevenue.toLocaleString()}`;
             document.getElementById('pendingOrders').textContent = pendingOrders.length;
+            document.getElementById('dataCount').textContent = `${totalOrders}/1000`;
+            
+            // 检查数据容量
+            if (totalOrders >= 1000) {
+                document.getElementById('dataCount').style.color = '#ef4444';
+                alert('数据存储已满（1000条），建议导出后清理数据');
+            } else if (totalOrders >= 900) {
+                document.getElementById('dataCount').style.color = '#f59e0b';
+            }
         }
         
         // 渲染订单表格
@@ -504,10 +558,11 @@
             
             tableBody.innerHTML = orders.map(order => `
                 <tr>
-                    <td>${order.orderId}</td>
                     <td>${order.companyName || '未填写'}</td>
-                    <td>${order.contactPerson || '未填写'}</td>
+                    <td>${order.creditCode || '未填写'}</td>
+                    <td>${order.legalPerson || order.contactPerson || '未填写'}</td>
                     <td>${order.contactPhone || '未填写'}</td>
+                    <td>${order.selectedService || '年报申报'}</td>
                     <td>
                         <span class="status-badge ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-pending'}">
                             ${order.paymentStatus === 'paid' ? '已支付' : '待支付'}
@@ -628,6 +683,74 @@
                 loadOrders();
             }
         });
+        
+        // 导出数据为Excel格式
+        function exportData() {
+            const orders = getAllOrders();
+            if (orders.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+            
+            // 只导出已支付的订单
+            const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+            if (paidOrders.length === 0) {
+                alert('暂无已支付订单可导出');
+                return;
+            }
+            
+            // 创建CSV内容
+            const headers = ['企业名称', '统一社会信用代码', '法人姓名', '联系电话', '服务类型', '支付金额', '支付时间'];
+            const csvContent = [
+                headers.join(','),
+                ...paidOrders.map(order => [
+                    `"${order.companyName || '未填写'}"`,
+                    `"${order.creditCode || '未填写'}"`, 
+                    `"${order.legalPerson || order.contactPerson || '未填写'}"`,
+                    `"${order.contactPhone || '未填写'}"`,
+                    `"${order.selectedService || '年报申报'}"`,
+                    `"¥${order.selectedPrice || 130}"`,
+                    `"${formatDateTime(order.paymentTime || order.createTime)}"`
+                ].join(','))
+            ].join('\n');
+            
+            // 创建下载链接
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `企业信息数据_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`已导出 ${paidOrders.length} 条已支付订单数据`);
+        }
+        
+        // 清空数据
+        function clearData() {
+            const orders = getAllOrders();
+            if (orders.length === 0) {
+                alert('暂无数据需要清理');
+                return;
+            }
+            
+            if (confirm(`确定要清空所有 ${orders.length} 条数据吗？此操作不可恢复！\n\n建议先导出数据再清理。`)) {
+                const keys = Object.keys(localStorage);
+                let deletedCount = 0;
+                
+                keys.forEach(key => {
+                    if (key.startsWith('order_')) {
+                        localStorage.removeItem(key);
+                        deletedCount++;
+                    }
+                });
+                
+                alert(`已清理 ${deletedCount} 条数据`);
+                loadOrders(); // 重新加载数据
+            }
+        }
         
         // 定时刷新数据（每30秒）
         setInterval(function() {
