@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员后台 - 企业年报服务平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .admin-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 20px;
+        }
+        
+        .stat-icon.orders {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stat-icon.revenue {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .stat-icon.pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .orders-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 25px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .export-btn, .clear-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .export-btn:hover, .clear-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .clear-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .data-count {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .orders-table th,
+        .orders-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .orders-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .orders-table td {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .orders-table tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-paid {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .view-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .view-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .detail-group {
+            margin-bottom: 20px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: #6b7280;
+            font-size: 14px;
+            background-color: #f9fafb;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .orders-table {
+                font-size: 12px;
+            }
+            
+            .orders-table th,
+            .orders-table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1 class="header-title">管理员后台</h1>
+            <div class="header-actions">
+                <div class="admin-info">
+                    欢迎，管理员 | <span id="loginTime"></span>
+                </div>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon orders">📊</div>
+                <div class="stat-number" id="totalOrders">0</div>
+                <div class="stat-label">总订单数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon revenue">💰</div>
+                <div class="stat-number" id="totalRevenue">¥0</div>
+                <div class="stat-label">总收入</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pending">⏳</div>
+                <div class="stat-number" id="pendingOrders">0</div>
+                <div class="stat-label">待处理订单</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orders">💾</div>
+                <div class="stat-number" id="dataCount">0/1000</div>
+                <div class="stat-label">数据存储</div>
+            </div>
+        </div>
+        
+        <!-- 订单列表 -->
+        <div class="orders-section">
+            <div class="section-header">
+                <h2 class="section-title">企业信息管理</h2>
+                <div class="export-actions">
+                    <button class="export-btn" onclick="exportData()">导出数据</button>
+                    <button class="clear-btn" onclick="clearData()">清空数据</button>
+                    <button class="refresh-btn" onclick="loadOrders()">刷新数据</button>
+                </div>
+            </div>
+            
+            <div id="ordersTableContainer">
+                <table class="orders-table" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>企业名称</th>
+                            <th>统一社会信用代码</th>
+                            <th>法人姓名</th>
+                            <th>联系电话</th>
+                            <th>服务类型</th>
+                            <th>支付状态</th>
+                            <th>提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                    </tbody>
+                </table>
+                
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">📋</div>
+                    <h3>暂无订单数据</h3>
+                    <p>当有用户提交订单时，数据将显示在这里</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 订单详情模态框 -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">订单详情</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 详情内容将通过JavaScript动态填充 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查登录状态
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        // 显示登录时间（北京时间）
+        function displayLoginTime() {
+            const loginTime = localStorage.getItem('adminLoginTime');
+            if (loginTime) {
+                const date = new Date(loginTime);
+                document.getElementById('loginTime').textContent = 
+                    date.toLocaleString('zh-CN', {
+                        timeZone: 'Asia/Shanghai',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = 'admin-login.html';
+            }
+        }
+        
+        // 加载订单数据
+        function loadOrders() {
+            const orders = getAllOrders();
+            updateStatistics(orders);
+            renderOrdersTable(orders);
+        }
+        
+        // 获取所有订单数据
+        function getAllOrders() {
+            const orders = [];
+            const keys = Object.keys(localStorage);
+            
+            keys.forEach(key => {
+                if (key.startsWith('order_')) {
+                    try {
+                        const orderData = JSON.parse(localStorage.getItem(key));
+                        orders.push(orderData);
+                    } catch (e) {
+                        console.error('解析订单数据失败:', e);
+                    }
+                }
+            });
+            
+            // 按创建时间倒序排列
+            return orders.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+        }
+        
+        // 更新统计数据
+        function updateStatistics(orders) {
+            const totalOrders = orders.length;
+            const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+            const pendingOrders = orders.filter(order => order.paymentStatus === 'pending');
+            
+            // 计算总收入（根据实际价格）
+            const totalRevenue = paidOrders.reduce((sum, order) => {
+                return sum + (order.selectedPrice || 130);
+            }, 0);
+            
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalRevenue').textContent = `¥${totalRevenue.toLocaleString()}`;
+            document.getElementById('pendingOrders').textContent = pendingOrders.length;
+            document.getElementById('dataCount').textContent = `${totalOrders}/1000`;
+            
+            // 检查数据容量
+            if (totalOrders >= 1000) {
+                document.getElementById('dataCount').style.color = '#ef4444';
+                alert('数据存储已满（1000条），建议导出后清理数据');
+            } else if (totalOrders >= 900) {
+                document.getElementById('dataCount').style.color = '#f59e0b';
+            }
+        }
+        
+        // 渲染订单表格
+        function renderOrdersTable(orders) {
+            const tableBody = document.getElementById('ordersTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('ordersTable');
+            
+            if (orders.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            
+            tableBody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.companyName || '未填写'}</td>
+                    <td>${order.creditCode || '未填写'}</td>
+                    <td>${order.legalPerson || order.contactPerson || '未填写'}</td>
+                    <td>${order.contactPhone || '未填写'}</td>
+                    <td>${order.selectedService || '年报申报'}</td>
+                    <td>
+                        <span class="status-badge ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-pending'}">
+                            ${order.paymentStatus === 'paid' ? '已支付' : '待支付'}
+                        </span>
+                    </td>
+                    <td>${formatDateTime(order.createTime)}</td>
+                    <td>
+                        <button class="view-btn" onclick="viewOrderDetails('${order.orderId}')">
+                            查看详情
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 格式化日期时间（北京时间）
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // 查看订单详情
+        function viewOrderDetails(orderId) {
+            const orderData = localStorage.getItem(`order_${orderId}`);
+            if (!orderData) {
+                alert('订单数据不存在');
+                return;
+            }
+            
+            const order = JSON.parse(orderData);
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">订单号</div>
+                    <div class="detail-value">${order.orderId}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">企业名称</div>
+                    <div class="detail-value">${order.companyName || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">统一社会信用代码</div>
+                    <div class="detail-value">${order.creditCode || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">联系人</div>
+                    <div class="detail-value">${order.contactPerson || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">联系电话</div>
+                    <div class="detail-value">${order.contactPhone || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">电子邮箱</div>
+                    <div class="detail-value">${order.email || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">企业地址</div>
+                    <div class="detail-value">${order.address || '未填写'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">支付方式</div>
+                    <div class="detail-value">${order.paymentMethod === 'wechat' ? '微信支付' : order.paymentMethod === 'alipay' ? '支付宝' : '未选择'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">支付状态</div>
+                    <div class="detail-value">
+                        <span class="status-badge ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-pending'}">
+                            ${order.paymentStatus === 'paid' ? '已支付' : '待支付'}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">订单金额</div>
+                    <div class="detail-value">¥${order.selectedPrice || 130}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">创建时间</div>
+                    <div class="detail-value">${formatDateTime(order.createTime)}</div>
+                </div>
+                ${order.paymentTime ? `
+                <div class="detail-group">
+                    <div class="detail-label">支付时间</div>
+                    <div class="detail-value">${formatDateTime(order.paymentTime)}</div>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('orderModal').style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // 页面加载时执行
+        window.addEventListener('load', function() {
+            if (checkLoginStatus()) {
+                displayLoginTime();
+                loadOrders();
+            }
+        });
+        
+        // 导出数据为Excel格式
+        function exportData() {
+            const orders = getAllOrders();
+            if (orders.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+            
+            // 只导出已支付的订单
+            const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+            if (paidOrders.length === 0) {
+                alert('暂无已支付订单可导出');
+                return;
+            }
+            
+            // 创建CSV内容
+            const headers = ['企业名称', '统一社会信用代码', '法人姓名', '联系电话', '服务类型', '支付金额', '支付时间'];
+            const csvContent = [
+                headers.join(','),
+                ...paidOrders.map(order => [
+                    `"${order.companyName || '未填写'}"`,
+                    `"${order.creditCode || '未填写'}"`, 
+                    `"${order.legalPerson || order.contactPerson || '未填写'}"`,
+                    `"${order.contactPhone || '未填写'}"`,
+                    `"${order.selectedService || '年报申报'}"`,
+                    `"¥${order.selectedPrice || 130}"`,
+                    `"${formatDateTime(order.paymentTime || order.createTime)}"`
+                ].join(','))
+            ].join('\n');
+            
+            // 创建下载链接
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `企业信息数据_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`已导出 ${paidOrders.length} 条已支付订单数据`);
+        }
+        
+        // 清空数据
+        function clearData() {
+            const orders = getAllOrders();
+            if (orders.length === 0) {
+                alert('暂无数据需要清理');
+                return;
+            }
+            
+            if (confirm(`确定要清空所有 ${orders.length} 条数据吗？此操作不可恢复！\n\n建议先导出数据再清理。`)) {
+                const keys = Object.keys(localStorage);
+                let deletedCount = 0;
+                
+                keys.forEach(key => {
+                    if (key.startsWith('order_')) {
+                        localStorage.removeItem(key);
+                        deletedCount++;
+                    }
+                });
+                
+                alert(`已清理 ${deletedCount} 条数据`);
+                loadOrders(); // 重新加载数据
+            }
+        }
+        
+        // 定时刷新数据（每30秒）
+        setInterval(function() {
+            if (checkLoginStatus()) {
+                loadOrders();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
