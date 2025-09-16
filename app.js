@@ -13,8 +13,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, './')));
 
 // 路由
-const wechatRoutes = require('./wechat');
-const alipayRoutes = require('./alipay');
+const wechatRoutes = require('./routes/wechat');
+const alipayRoutes = require('./routes/alipay');
 
 app.use('/api/payment/wechat', wechatRoutes);
 app.use('/api/payment/alipay', alipayRoutes);
