@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const crypto = require('crypto');
 const router = express.Router();
-const config = require('./payment');
+const config = require('../config/payment');
 
 // 生成MD5签名
 function getHash(params, appSecret) {

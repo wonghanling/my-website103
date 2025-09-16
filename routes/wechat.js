@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const axios = require('axios');
 const router = express.Router();
-const config = require('./payment');
+const config = require('../config/payment');
 
 // 微信支付统一下单
 router.post('/create-order', async (req, res) => {
