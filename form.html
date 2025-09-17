@@ -134,6 +134,31 @@
             background-color: #3b82f6;
             cursor: pointer;
         }
+
+        .contact-btn {
+            display: block;
+            margin: 10px 20px 20px;
+            padding: 15px;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            width: calc(100% - 40px);
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .contact-btn:hover {
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+        }
+
+        .contact-btn i {
+            margin-right: 8px;
+        }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -158,6 +183,11 @@
         </div>
         
         <button class="submit-btn" id="submitBtn" onclick="submitForm()">确认信息并支付</button>
+
+        <a href="https://work.weixin.qq.com/ca/cawcdeac58029da582" target="_blank" class="contact-btn">
+            <i class="fas fa-comments"></i>
+            立即联系
+        </a>
     </div>
     
     <script>
