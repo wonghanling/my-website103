@@ -21,7 +21,7 @@ module.exports = {
     baseUrl: process.env.BASE_URL || 'https://trreys.com',
     prices: {
         annualReport: 130,    // 130元，虎皮椒按元计算
-        licenseCancel: 199,   // 199元，虎皮椒按元计算
+        licenseCancel: 599,   // 599元，虎皮椒按元计算
         zeroReport: 980       // 980元，年代账服务
     }
 };
