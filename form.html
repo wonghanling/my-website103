@@ -387,42 +387,6 @@
 
                 showMessage('企业信息提交成功！', false);
 
-                // 发送企业微信通知
-                try {
-                    const currentTime = new Date().toLocaleString('zh-CN', {
-                        timeZone: 'Asia/Shanghai',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-
-                    await fetch('https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=20a25255-e5af-4e81-9b6e-c40128b52387', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            msgtype: 'text',
-                            text: {
-                                content: `📋 【年审表代账】新企业信息提交\n\n` +
-                                        `🏢 企业名称：${companyName}\n` +
-                                        `🔖 信用代码：${socialCreditCode}\n` +
-                                        `👤 法人姓名：${legalPersonName}\n` +
-                                        `📞 联系电话：${contactPhone}\n` +
-                                        `🎯 选择服务：${selectedService}\n` +
-                                        `💰 服务价格：¥${selectedPrice}\n` +
-                                        `⏰ 提交时间：${currentTime}`
-                            }
-                        })
-                    });
-                } catch (wechatError) {
-                    console.error('企业微信通知发送失败:', wechatError);
-                    // 通知失败不影响主流程
-                }
-
                 // 生成订单号（仅用于支付系统）
                 const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
 
