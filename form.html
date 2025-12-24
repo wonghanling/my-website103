@@ -308,132 +308,150 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Supabase 配置 - 使用与 PawNest 相同的数据库
-        const SUPABASE_URL = 'https://xlpvymwpfkhnumsvzbkl.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhscHZ5bXdwZmtobnVtc3Z6YmtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NTYyNTgsImV4cCI6MjA3NjQzMjI1OH0.pSCrpwOCmX-YrJyI9TR80jHlZODYMGgDwUeN-7QpbW8';
+        // 使用IIFE避免全局变量冲突，保护聊天组件
+        (function() {
+            // Supabase 配置
+            const SUPABASE_URL = 'https://xlpvymwpfkhnumsvzbkl.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhscHZ5bXdwZmtobnVtc3Z6YmtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NTYyNTgsImV4cCI6MjA3NjQzMjI1OH0.pSCrpwOCmX-YrJyI9TR80jHlZODYMGgDwUeN-7QpbW8';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            let supabaseClient = null;
 
-        const submitBtn = document.getElementById('submitBtn');
-        const messageContainer = document.getElementById('messageContainer');
-
-        function showMessage(message, isError = false) {
-            messageContainer.innerHTML = `
-                <div class="${isError ? 'error-message' : 'success-message'}">
-                    ${message}
-                </div>
-            `;
-        }
-
-        function goBack() {
-            window.location.href = 'index.html';
-        }
-
-        async function submitForm() {
-            // 获取表单数据
-            const form = document.getElementById('enterpriseForm');
-            const formData = new FormData(form);
-
-            const companyName = formData.get('companyName').trim();
-            const socialCreditCode = formData.get('socialCreditCode').trim();
-            const legalPersonName = formData.get('legalPersonName').trim();
-            const contactPhone = formData.get('contactPhone').trim();
-
-            // 表单验证
-            if (!companyName || !socialCreditCode || !legalPersonName || !contactPhone) {
-                showMessage('请填写所有必填字段', true);
-                return;
+            // 初始化Supabase
+            if (typeof window.supabase !== 'undefined') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error('Supabase库未加载');
             }
 
-            // 验证统一社会信用代码格式
-            if (!/^[0-9A-Z]{18}$/.test(socialCreditCode)) {
-                showMessage('统一社会信用代码格式不正确，应为18位数字或大写字母', true);
-                return;
+            const submitBtn = document.getElementById('submitBtn');
+            const messageContainer = document.getElementById('messageContainer');
+
+            function showMessage(message, isError = false) {
+                if (messageContainer) {
+                    messageContainer.innerHTML = `
+                        <div class="${isError ? 'error-message' : 'success-message'}">
+                            ${message}
+                        </div>
+                    `;
+                }
             }
 
-            // 验证手机号格式
-            if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
-                showMessage('请输入正确的手机号码', true);
-                return;
-            }
+            // 暴露goBack到全局作用域
+            window.goBack = function() {
+                window.location.href = 'index.html';
+            };
 
-            // 显示提交状态
-            submitBtn.disabled = true;
-            submitBtn.textContent = '提交中...';
+            // 暴露submitForm到全局作用域
+            window.submitForm = async function() {
+                // 获取表单数据
+                const form = document.getElementById('enterpriseForm');
+                const formData = new FormData(form);
 
-            try {
-                // 获取选择的服务信息
-                const selectedService = localStorage.getItem('selectedService') || '年报申报';
-                const selectedPrice = parseInt(localStorage.getItem('selectedPrice')) || 130;
+                const companyName = formData.get('companyName').trim();
+                const socialCreditCode = formData.get('socialCreditCode').trim();
+                const legalPersonName = formData.get('legalPersonName').trim();
+                const contactPhone = formData.get('contactPhone').trim();
 
-                // 提交企业信息到 Supabase
-                const { data, error } = await supabase
-                    .from('enterprise_submissions')
-                    .insert([
-                        {
-                            company_name: companyName,
-                            social_credit_code: socialCreditCode,
-                            legal_person_name: legalPersonName,
-                            contact_phone: contactPhone,
-                            selected_service: selectedService,
-                            selected_price: selectedPrice,
-                            created_at: new Date().toISOString()
-                        }
-                    ])
-                    .select();
-
-                if (error) {
-                    throw error;
+                // 表单验证
+                if (!companyName || !socialCreditCode || !legalPersonName || !contactPhone) {
+                    showMessage('请填写所有必填字段', true);
+                    return;
                 }
 
-                showMessage('企业信息提交成功！', false);
+                // 验证统一社会信用代码格式
+                if (!/^[0-9A-Z]{18}$/.test(socialCreditCode)) {
+                    showMessage('统一社会信用代码格式不正确，应为18位数字或大写字母', true);
+                    return;
+                }
 
-                // 生成订单号（仅用于支付系统）
-                const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
+                // 验证手机号格式
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showMessage('请输入正确的手机号码', true);
+                    return;
+                }
 
-                // 创建订单数据（仅保存到本地，供支付系统使用）
-                const orderData = {
-                    orderId: orderId,
-                    companyName: companyName,
-                    socialCreditCode: socialCreditCode,
-                    legalPersonName: legalPersonName,
-                    contactPhone: contactPhone,
-                    selectedService: selectedService,
-                    selectedPrice: selectedPrice,
-                    paymentStatus: 'pending',
-                    paymentMethod: null,
-                    createTime: new Date().toISOString(),
-                    paymentTime: null
-                };
+                // 显示提交状态
+                submitBtn.disabled = true;
+                submitBtn.textContent = '提交中...';
 
-                // 保存到本地存储（供支付系统使用）
-                localStorage.setItem('formData', JSON.stringify(orderData));
-                localStorage.setItem('currentOrderId', orderId);
-                localStorage.setItem(`order_${orderId}`, JSON.stringify(orderData));
+                try {
+                    // 获取选择的服务信息
+                    const selectedService = localStorage.getItem('selectedService') || '年报申报';
+                    const selectedPrice = parseInt(localStorage.getItem('selectedPrice')) || 130;
 
-                // 延迟后跳转到支付页面
-                setTimeout(() => {
-                    window.location.href = 'payment.html';
-                }, 2000);
+                    if (!supabaseClient) {
+                        throw new Error('系统未初始化，请刷新页面重试');
+                    }
 
-            } catch (error) {
-                console.error('提交错误:', error);
-                showMessage('提交失败，请重试: ' + error.message, true);
+                    // 提交企业信息到 Supabase
+                    const { data, error } = await supabaseClient
+                        .from('enterprise_submissions')
+                        .insert([
+                            {
+                                company_name: companyName,
+                                social_credit_code: socialCreditCode,
+                                legal_person_name: legalPersonName,
+                                contact_phone: contactPhone,
+                                selected_service: selectedService,
+                                selected_price: selectedPrice,
+                                created_at: new Date().toISOString()
+                            }
+                        ])
+                        .select();
 
-                // 恢复按钮状态
-                submitBtn.disabled = false;
-                submitBtn.textContent = '确认信息并支付';
-            }
-        }
-        
-        // 页面加载时检查是否有保存的数据
-        window.onload = function() {
-            // 如果没有选择服务，默认设置为年报申报
-            if (!localStorage.getItem('selectedService')) {
-                localStorage.setItem('selectedService', '年报申报');
-                localStorage.setItem('selectedPrice', '130');
-            }
-        };
+                    if (error) {
+                        throw error;
+                    }
+
+                    showMessage('企业信息提交成功！正在跳转支付...', false);
+
+                    // 生成订单号（仅用于支付系统）
+                    const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+                    // 创建订单数据（仅保存到本地，供支付系统使用）
+                    const orderData = {
+                        orderId: orderId,
+                        companyName: companyName,
+                        socialCreditCode: socialCreditCode,
+                        legalPersonName: legalPersonName,
+                        contactPhone: contactPhone,
+                        selectedService: selectedService,
+                        selectedPrice: selectedPrice,
+                        paymentStatus: 'pending',
+                        paymentMethod: null,
+                        createTime: new Date().toISOString(),
+                        paymentTime: null
+                    };
+
+                    // 保存到本地存储（供支付系统使用）
+                    localStorage.setItem('formData', JSON.stringify(orderData));
+                    localStorage.setItem('currentOrderId', orderId);
+                    localStorage.setItem(`order_${orderId}`, JSON.stringify(orderData));
+
+                    // 延迟后跳转到支付页面
+                    setTimeout(() => {
+                        window.location.href = 'payment.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('提交错误:', error);
+                    showMessage('提交失败，请重试: ' + error.message, true);
+
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '确认信息并支付';
+                }
+            };
+            
+            // 页面加载时检查是否有保存的数据
+            window.addEventListener('DOMContentLoaded', function() {
+                // 如果没有选择服务，默认设置为年报申报
+                if (!localStorage.getItem('selectedService')) {
+                    localStorage.setItem('selectedService', '年报申报');
+                    localStorage.setItem('selectedPrice', '130');
+                }
+            });
+        })();
     </script>
 </body>
 </html>
