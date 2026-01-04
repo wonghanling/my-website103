@@ -296,7 +296,7 @@
             <div class="warning-text">请确保信息准确，提交后将立即开始处理</div>
         </div>
         
-        <button class="submit-btn" id="submitBtn" onclick="submitForm()">确认信息并支付</button>
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">提交企业信息</button>
 
         <a href="https://work.weixin.qq.com/ca/cawcdeac58029da582" target="_blank" class="contact-btn">
             <i class="fas fa-comments"></i>
@@ -403,12 +403,12 @@
                         throw error;
                     }
 
-                    showMessage('企业信息提交成功！正在跳转支付...', false);
+                    showMessage('企业信息提交成功！正在跳转到支付页面...', false);
 
-                    // 生成订单号（仅用于支付系统）
+                    // 生成订单号（用于支付）
                     const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-                    // 创建订单数据（仅保存到本地，供支付系统使用）
+                    // 创建订单数据（保存到localStorage，供支付页面使用）
                     const orderData = {
                         orderId: orderId,
                         companyName: companyName,
@@ -418,9 +418,7 @@
                         selectedService: selectedService,
                         selectedPrice: selectedPrice,
                         paymentStatus: 'pending',
-                        paymentMethod: null,
-                        createTime: new Date().toISOString(),
-                        paymentTime: null
+                        createTime: new Date().toISOString()
                     };
 
                     // 保存到本地存储（供支付系统使用）

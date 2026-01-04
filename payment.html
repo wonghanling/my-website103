@@ -253,16 +253,12 @@
                 </div>
                 <div class="payment-price" id="alipayPrice">加载中...</div>
             </div>
-            <div class="payment-description">点击按钮查看支付宝收款二维码</div>
-            <button class="pay-btn alipay" onclick="createAlipayOrder()">
-                确认付款 ✓
+            <div class="payment-description">点击下方按钮进行支付</div>
+            <button class="pay-btn alipay" onclick="createAlipayOrder()" id="payButton">
+                确认支付 ✓
             </button>
-            <div class="qr-code" id="alipayQR">
-                <div class="qr-placeholder">
-                    [支付宝支付二维码]<br>
-                    请使用支付宝扫码支付
-                </div>
-                <div class="qr-instruction">请使用支付宝扫描上方二维码完成支付</div>
+            <div class="qr-code" id="alipayQR" style="display: none;">
+                <!-- 二维码会动态生成在这里 -->
             </div>
         </div>
     </div>
@@ -295,7 +291,7 @@
         // 创建支付宝订单
         async function createAlipayOrder() {
             try {
-                const payBtn = document.querySelector('.pay-btn.alipay');
+                const payBtn = document.getElementById('payButton');
                 payBtn.textContent = '处理中...';
                 payBtn.disabled = true;
 
@@ -331,6 +327,7 @@
                     if (isMobile) {
                         // 移动端：直接插入HTML表单并自动提交（跳转到支付宝App）
                         document.body.insertAdjacentHTML('beforeend', result.payment_url);
+                        payBtn.textContent = '正在跳转支付宝...';
                     } else {
                         // 电脑端：提取URL并生成二维码
                         // 从HTML表单中提取action URL
@@ -346,39 +343,46 @@
                             const params = new URLSearchParams(formData);
                             const fullUrl = actionUrl + (actionUrl.includes('?') ? '&' : '?') + params.toString();
 
-                            // 使用QRCode库生成二维码（需要先引入库）
+                            // 显示二维码容器
                             const qrContainer = document.getElementById('alipayQR');
-                            qrContainer.innerHTML = '<div id="qrcode"></div><p style="margin-top:10px;color:#666;">请使用支付宝扫码支付</p>';
+                            qrContainer.style.display = 'block';
+                            qrContainer.innerHTML = '<div id="qrcode" style="text-align:center;padding:20px;"></div><p style="text-align:center;color:#666;margin-top:15px;">请使用支付宝扫码支付</p>';
 
-                            // 生成二维码（如果页面已经引入了qrcode库）
+                            // 生成二维码
                             if (typeof QRCode !== 'undefined') {
                                 new QRCode(document.getElementById('qrcode'), {
                                     text: fullUrl,
-                                    width: 200,
-                                    height: 200
+                                    width: 256,
+                                    height: 256,
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.H
                                 });
+                                payBtn.textContent = '二维码已生成 ✓';
+                                payBtn.disabled = true;
                             } else {
                                 // 如果没有QRCode库，直接跳转
+                                console.error('QRCode库未加载，使用表单提交方式');
                                 document.body.insertAdjacentHTML('beforeend', result.payment_url);
+                                payBtn.textContent = '正在跳转...';
                             }
                         } else {
                             // 无法解析表单，直接跳转
                             document.body.insertAdjacentHTML('beforeend', result.payment_url);
+                            payBtn.textContent = '正在跳转...';
                         }
                     }
-
-                    payBtn.textContent = '支付已创建 ✓';
                 } else {
                     alert('支付创建失败: ' + (result.error || '未知错误'));
-                    payBtn.textContent = '确认付款 ✓';
+                    payBtn.textContent = '确认支付 ✓';
                     payBtn.disabled = false;
                 }
 
             } catch (error) {
                 console.error('支付请求失败:', error);
                 alert('支付请求失败，请重试');
-                const payBtn = document.querySelector('.pay-btn.alipay');
-                payBtn.textContent = '确认付款 ✓';
+                const payBtn = document.getElementById('payButton');
+                payBtn.textContent = '确认支付 ✓';
                 payBtn.disabled = false;
             }
         }
