@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>选择支付方式</title>
-    <!-- 引入QRCode.js库，用于生成二维码 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -321,54 +319,18 @@
                 const result = await response.json();
 
                 if (result.success && result.payment_url) {
-                    // 判断是否是移动设备
-                    const isMobile = /mobile|android|iphone|ipad|phone/i.test(navigator.userAgent);
+                    // 创建临时div来渲染支付表单（samdaigou的做法）
+                    const div = document.createElement('div');
+                    div.innerHTML = result.payment_url;
+                    document.body.appendChild(div);
 
-                    if (isMobile) {
-                        // 移动端：直接插入HTML表单并自动提交（跳转到支付宝App）
-                        document.body.insertAdjacentHTML('beforeend', result.payment_url);
-                        payBtn.textContent = '正在跳转支付宝...';
-                    } else {
-                        // 电脑端：提取URL并生成二维码
-                        // 从HTML表单中提取action URL
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = result.payment_url;
-                        const form = tempDiv.querySelector('form');
-
-                        if (form) {
-                            const actionUrl = form.getAttribute('action');
-                            const formData = new FormData(form);
-
-                            // 构建完整的支付URL（包含form参数）
-                            const params = new URLSearchParams(formData);
-                            const fullUrl = actionUrl + (actionUrl.includes('?') ? '&' : '?') + params.toString();
-
-                            // 显示二维码容器
-                            const qrContainer = document.getElementById('alipayQR');
-                            qrContainer.style.display = 'block';
-                            qrContainer.innerHTML = '<div id="qrcode" style="text-align:center;padding:20px;"></div><p style="text-align:center;color:#666;margin-top:15px;">请使用支付宝扫码支付</p>';
-
-                            // 生成二维码
-                            if (typeof QRCode !== 'undefined') {
-                                new QRCode(document.getElementById('qrcode'), {
-                                    text: fullUrl,
-                                    width: 256,
-                                    height: 256
-                                });
-                                payBtn.textContent = '二维码已生成 ✓';
-                                payBtn.disabled = true;
-                            } else {
-                                // 如果没有QRCode库，直接跳转
-                                console.error('QRCode库未加载，使用表单提交方式');
-                                document.body.insertAdjacentHTML('beforeend', result.payment_url);
-                                payBtn.textContent = '正在跳转...';
-                            }
-                        } else {
-                            // 无法解析表单，直接跳转
-                            document.body.insertAdjacentHTML('beforeend', result.payment_url);
-                            payBtn.textContent = '正在跳转...';
-                        }
+                    // 手动执行表单中的自动提交script
+                    const script = div.querySelector('script');
+                    if (script) {
+                        eval(script.innerHTML);
                     }
+
+                    payBtn.textContent = '正在跳转支付宝...';
                 } else {
                     alert('支付创建失败: ' + (result.error || '未知错误'));
                     payBtn.textContent = '确认支付 ✓';
