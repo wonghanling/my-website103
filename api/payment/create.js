@@ -1,5 +1,6 @@
 const { createPCPayment, createMobilePayment, isMobile, generateOrderNo } = require('../../lib/alipay');
 
+// Vercel会自动解析body，但需要确保Content-Type正确
 module.exports = async function handler(req, res) {
   // 设置CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,10 +16,21 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { serviceType, amount, orderId } = req.body;
+    // 如果body是字符串，手动解析JSON
+    let body = req.body;
+    if (typeof body === 'string') {
+      body = JSON.parse(body);
+    }
+
+    const { serviceType, amount, orderId } = body;
+
+    console.log('收到支付请求:', { serviceType, amount, orderId }); // 调试日志
 
     if (!amount || !orderId) {
-      return res.status(400).json({ success: false, error: '缺少必要参数' });
+      return res.status(400).json({
+        success: false,
+        error: `缺少必要参数 - amount: ${amount}, orderId: ${orderId}`
+      });
     }
 
     // 生成支付宝订单号
