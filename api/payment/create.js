@@ -1,4 +1,11 @@
 const { createPCPayment, createMobilePayment, isMobile, generateOrderNo } = require('../../lib/alipay');
+const { createClient } = require('@supabase/supabase-js');
+
+// 初始化Supabase客户端
+const supabase = createClient(
+  process.env.SUPABASE_URL || 'https://mtotipilbjlkducccnko.supabase.co',
+  process.env.SUPABASE_ANON_KEY || 'sb_publishable_hI-vAHNFQpWeyUR0O3-_0Q_JeqQ7qWH'
+);
 
 // Vercel会自动解析body，但需要确保Content-Type正确
 module.exports = async function handler(req, res) {
@@ -22,9 +29,9 @@ module.exports = async function handler(req, res) {
       body = JSON.parse(body);
     }
 
-    const { serviceType, amount, orderId } = body;
+    const { serviceType, amount, orderId, companyName, contactPhone, enterpriseSubmissionId } = body;
 
-    console.log('收到支付请求:', { serviceType, amount, orderId }); // 调试日志
+    console.log('收到支付请求:', { serviceType, amount, orderId, companyName }); // 调试日志
 
     if (!amount || !orderId) {
       return res.status(400).json({
@@ -49,6 +56,30 @@ module.exports = async function handler(req, res) {
     };
 
     const subject = serviceNames[serviceType] || '企业服务';
+
+    // 保存订单到Supabase
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        order_no: orderId,
+        alipay_order_no: alipayOrderNo,
+        enterprise_submission_id: enterpriseSubmissionId || null,
+        company_name: companyName || '未提供',
+        contact_phone: contactPhone || '未提供',
+        service_type: serviceType,
+        service_name: subject,
+        amount: parseFloat(amount),
+        payment_status: 'pending',
+        payment_method: 'alipay'
+      }])
+      .select();
+
+    if (orderError) {
+      console.error('保存订单失败:', orderError);
+      // 不中断流程，继续创建支付
+    } else {
+      console.log('订单已保存:', orderData);
+    }
 
     // 支付参数
     const paymentParams = {

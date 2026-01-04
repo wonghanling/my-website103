@@ -293,6 +293,10 @@
                 payBtn.textContent = '处理中...';
                 payBtn.disabled = true;
 
+                // 从localStorage获取表单数据
+                const formData = localStorage.getItem('formData');
+                const parsedData = formData ? JSON.parse(formData) : {};
+
                 const selectedService = localStorage.getItem('selectedService');
                 let serviceType = 'licenseCancel'; // 默认值
 
@@ -312,7 +316,10 @@
                     body: JSON.stringify({
                         serviceType: serviceType,
                         amount: currentAmount,
-                        orderId: currentOrderId
+                        orderId: currentOrderId,
+                        companyName: parsedData.companyName || '未提供',
+                        contactPhone: parsedData.contactPhone || '未提供',
+                        enterpriseSubmissionId: null  // 可以后续关联
                     })
                 });
 
